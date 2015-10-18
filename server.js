@@ -75,7 +75,9 @@ app.get('/api/add-drink', function (req, res) {
 app.get('/api/fb-login', function (req, res) {
     var token = req.query.token;
     //make requests to graph API.
-    //check if the god damn use exists
+    //check if the god damn user exists
+
+
     var name = "Joe Smith",
         email = "Joe@Smith.com",
         fbToken = "ajlskdfja",
@@ -97,5 +99,7 @@ app.get('/api/fb-login', function (req, res) {
 });
 
 function GetDrink (ingredientList) {
+    //drink - inventory = empty set.
+    var drink = new drinkModel({});
     return ["Jagerbombs"];
 }
