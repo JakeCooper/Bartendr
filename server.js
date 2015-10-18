@@ -32,14 +32,15 @@ app.get('/', function(req, res) {
 });
 
 app.get('/api/get-drink', function (req, res) {
-    var ingredients = req.query.ingredient;
+    var ingredients = req.query.ingredients;
     console.log("GET : Request received with ingredients : " + ingredients);
     var drinks = GetDrink(ingredients);
-    console.log("POST : Response sent with drinks : " + drinks);
+    console.log("GET : Response sent with drinks : " + drinks);
     res.send(drinks);
 });
 
 app.get('/api/add-drink', function (req, res) {
+    console.log("GET : Request received to add drink with properties : " + req.query);
     var name = req.query.name,
         ingredients = req.query.ingredients.map(function (ingredient){
             return ingredient.replace("%20", " ");
@@ -48,13 +49,14 @@ app.get('/api/add-drink', function (req, res) {
         comments = req.query.comments;
 
     var drink = new drinkModel({name: name.replace("%20", " "), ingredients: ingredients, instructions: instructions.replace("%20", " "), comments: comments.replace("%20", " ")});
-    console.log("drink: " + drink);
+    console.log("drink summary: " + drink);
 
     drink.save(function (err) {
         if (err) {
             console.log(err);
             res.send(err);
         } else {
+            console.log("Sucess");
             res.send("Success");
         }
     });
