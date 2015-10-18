@@ -23,6 +23,7 @@
     "mongodb": "^2.0.46",
     "mongoose": "^4.1.11",
     "express-json": "*",
-    "body-parser": "*"
+    "body-parser": "*",
+    "request": "^2.65.0"
   }
 }
