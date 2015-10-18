@@ -14,7 +14,7 @@ var Schema = mongoose.Schema;
 var drinkSchema = new Schema({
     name  :  { type: String, default: '' },
     ingredients   :  { type: Array, default: [] },
-    instructions : {type: Array, default: []},
+    instructions : {type: String, default: ""},
     comments : {type: String, default: ''}
 });
 
@@ -40,21 +40,15 @@ app.get('/api/get-drink', function (req, res) {
 });
 
 app.get('/api/add-drink', function (req, res) {
-    var params = JSON.stringify(req.query);
-    if (params["name"] == undefined) {
-        res.send("Invalid name");
-        return
-    } else if (params["ingredients"] == undefined) {
-        res.send("Invalid ingredients");
-        return
-    } else if (params["instructions"] == undefined) {
-        res.send("Invalid instructions");
-        return
-    } else if (params["comments"] == undefined) {
-        params["comments"] = "";
-    }
-    var drink = new drinkModel({name: params["name"], ingredients: params["ingredients"], instructions: params["instructions"], comments:params["comments"]});
-    console.log("drink: " + test);
+    var name = req.query.name,
+        ingredients = req.query.ingredients.map(function (ingredient){
+            return ingredient.replace("%20", " ");
+        }),
+        instructions = req.query.instructions,
+        comments = req.query.comments;
+
+    var drink = new drinkModel({name: name.replace("%20", " "), ingredients: ingredients, instructions: instructions.replace("%20", " "), comments: comments.replace("%20", " ")});
+    console.log("drink: " + drink);
 
     drink.save(function (err) {
         if (err) {
