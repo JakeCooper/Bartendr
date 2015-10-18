@@ -179,7 +179,17 @@ app.get('/api/onedrive-auth-cont', function(req,res) {
   console.log(req.query);
   if (req.query.code) {
     var code = req.query.code;
-    console.log(code);
+    params = {"client_id":ODclientID, "redirect_uri":redirectLink, "client_secret":ODclientSec, "code":code, "grant_type":"authorization_code" }
+    request.post('https://login.live.com/oauth20_token.srf');
+    var options = {
+      url: 'https://login.live.com/oauth20_token.srf',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      }
+    }
+    request(options, function(error, response, body) {
+      console.log(response);
+    });
   }
 });
 
