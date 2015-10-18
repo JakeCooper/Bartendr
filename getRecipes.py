@@ -23,9 +23,10 @@ def strip_tags(html):
 
 
 drinks = [];
-for i in range(1513,6217):
+for i in range(5510,6217):
     drink = {}
-    print "checking drink "+ str(i)
+    if (i%100 == 0):
+        print "checking drink "+ str(i)
     url ="http://www.webtender.com/db/drink/"+str(i)
     headers = {'user-agent': 'my-app/0.0.1'}
     page = requests.get(url,headers=headers)
@@ -58,14 +59,19 @@ for i in range(1513,6217):
         else:
             drink["instructions"] = strip_tags(rest).strip();
 
-        with open("drinks.json", "a") as outfile:
-            json.dump(drink, outfile, indent=4)
-            outfile.write(",")
 
-        drinks.append(drink);
+        request_url = "https://bartendr.herokuapp.com/api/add-drink?"
+        encoded_params = urllib.urlencode(drink);
+
+        request_url = request_url + encoded_params
+        #r=requests.get(request_url)
+        #print r.status_code
+        #print request_url
+        drinks.append(drink)
 
 
-print json.dump(drinks)
+with open("drinks.json", "w") as outfile:
+    json.dump(drinks, outfile, indent=4)
 
 
 
