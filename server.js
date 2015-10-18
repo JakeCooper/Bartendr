@@ -48,9 +48,8 @@ app.get('/api/get-drink', function (req, res) {
     var ingredients = req.query.ingredients;
     console.log("GET : Request received with ingredients : " + ingredients);
     var query = drinkModel.find({ingredients : {$in : ingredients}});
-    query.select("name");
+    query.select("name instructions ingredients");
     query.exec(function (err, drink) {
-        console.log("Possible drinks are : " + drink);
         if (drink === undefined) {
             res.send("Sorry, you can't make anything.");
         } else {
