@@ -3,9 +3,17 @@
  */
 
 var app = require('express')(),
+    bodyParser = require('body-parser'),
     server = require('http').Server(app),
     MongoClient = require('mongodb').MongoClient,
-    mongoose = require('mongoose');
+    mongoose = require('mongoose'),
+    json = require('express-json');
+
+app.use(bodyParser.urlencoded({ extended: false }));
+
+// parse application/json
+app.use(bodyParser.json());
+
 
 var uri = "mongodb://admin:admin@ds041144.mongolab.com:41144/bartendr";
 var db = mongoose.connect(uri);
@@ -32,12 +40,23 @@ var userSchema = new Schema({
 
 var userModel = mongoose.model('users', userSchema);
 
+var drinkActionSchema = new Schema({
+  user : {  type : Schema.ObjectId },
+  comment : {type : String, default: ""},
+  drink : {type : Schema.ObjectId},
+  date : {type : Date, default: Date.now}
+});
+
+var drinkActionModel = mongoose.model('drinkactions', drinkActionSchema);
+
 server.listen(process.env.PORT, function(){
     var host = server.address().address;
     var port = server.address().port;
 
     console.log('Bartendr webserver launched at http://%s:%s', host, port);
 });
+
+
 
 app.get('/', function(req, res) {
    res.send("Welcome to Bartendr");
@@ -49,6 +68,53 @@ app.get('/api/get-drink', function (req, res) {
     var drinks = GetDrink(ingredients);
     console.log("GET : Response sent with drinks : " + drinks);
     res.send(drinks);
+});
+
+app.post('/api/after-drink', function (req, res) {
+    console.log("here");
+    var drink = req.body.drink;
+    var comment = req.body.comment
+    var tryAgain = req.body.tryAgain
+    console.log(tryAgain);
+    var token = req.body.token
+    console.log("GET : Request received with " + req.body);
+    console.log(req.body);
+    var user = userModel.findOne('fbToken',token);
+    var user_id = user._id;
+
+    var drinkAction = new drinkActionModel(
+      {
+        user: mongoose.Types.ObjectId(user_id),
+        comment: comment,
+        drink: mongoose.Types.ObjectId(drink)
+      }
+    )
+    drinkAction.save(function(err) {
+      if (err) {
+        console.log(err);
+        res.send(err);
+      } else {
+        console.log("Created drinkAction successfully");
+        var bannedDrinks = user.excludedDrinks;
+
+        if (tryAgain === false) {
+          console.log("here");
+          bannedDrinks.append(ObjectId(request.body.drink));
+          user.excludedDrinks = bannedDrinks;
+        }
+        userModel.update(
+        {
+          _id: user_id,
+        }, user, function (err, result) {
+          if (err) {
+            res.send("You fucked up");
+            res.send(err);
+          } else {
+            res.send("OK");
+          }
+        });
+      }
+    });
 });
 
 app.get('/api/add-drink', function (req, res) {
