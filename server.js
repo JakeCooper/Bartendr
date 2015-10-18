@@ -7,10 +7,12 @@ var app = require('express')(),
     MongoClient = require('mongodb').MongoClient,
     mongoose = require('mongoose'),
     request = require('request');
+    Clarifai = require('./clarifai_node.js');
 
 var uri = "mongodb://admin:admin@ds041144.mongolab.com:41144/bartendr";
 var db = mongoose.connect(uri);
 var Schema = mongoose.Schema;
+Clarifai.initAPI("_95O_mfpTpzCT4evHOuBNhDJ9kia-WPkrwiZcgwq", "qpBorF60XxbTklsK9j4MaDiXYzkJXBap6LoRvttX");
 
 var drinkSchema = new Schema({
     name  :  { type: String, default: '' },
@@ -200,8 +202,10 @@ app.get('/api/fb-login', function (req, res) {
         }
     });
 
-    //check if the god damn user exists
+    app.post('/api/getTags', function (req, res) {
+      var testImageURL = req.body.url;
+      var ourId = req.body.id;
 
-
-
+      Clarifai.tagURL( testImageURL , ourId, commonResultHandler );
+    });
 });
