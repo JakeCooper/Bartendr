@@ -5,7 +5,7 @@
 var app = require('express')(),
     server = require('http').Server(app);
 
-server.listen(80, function(){
+server.listen(process.env.port, function(){
     var host = server.address().address;
     var port = server.address().port;
 
