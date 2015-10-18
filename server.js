@@ -8,6 +8,11 @@ var app = require('express')(),
     mongoose = require('mongoose'),
     request = require('request');
 
+
+var ODclientID = "0000000040170505";
+var ODclientSec = "Hb33AVSZGiAKhooTaxQMoS2TScqxsDNs";
+var redirectLink = "https://bartendr.herokuapp.com/api/onedrive-auth-cont";
+
 var uri = "mongodb://admin:admin@ds041144.mongolab.com:41144/bartendr";
 var db = mongoose.connect(uri);
 var Schema = mongoose.Schema;
@@ -108,6 +113,20 @@ app.get('/api/add-drink', function (req, res) {
             res.send("Created drink successfully");
         }
     });
+});
+app.get('/api/start-onedrive-auth', function(req,res) {
+  var url = "https://login.live.com/oauth20_authorize.srf?client_id="+encodeURIComponent(ODclientID)+"&scope=onedrive.readwrite&response_type=code&redirect_uri="+redirectLink;
+  console.log(url);
+  res.redirect(url);
+});
+
+app.get('/api/onedrive-auth-cont', function(req,res) {
+  console.log("here");
+  console.log(req.query);
+  if (req.query.code) {
+    var code = req.query.code;
+    console.log(code);
+  }
 });
 
 app.get('/api/fb-login', function (req, res) {
