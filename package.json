@@ -13,6 +13,9 @@
   "keywords": [
     "bar"
   ],
+  "commands": {
+    "start": "node server.js"
+  },
   "author": "HootHacks",
   "license": "ISC",
   "dependencies": {
