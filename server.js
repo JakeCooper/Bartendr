@@ -15,6 +15,8 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
 
+
+
 var uri = "mongodb://admin:admin@ds041144.mongolab.com:41144/bartendr";
 var db = mongoose.connect(uri);
 var Schema = mongoose.Schema;
@@ -49,7 +51,7 @@ var drinkActionSchema = new Schema({
 
 var drinkActionModel = mongoose.model('drinkactions', drinkActionSchema);
 
-server.listen(process.env.PORT, function(){
+server.listen(3000, function(){
     var host = server.address().address;
     var port = server.address().port;
 
@@ -70,16 +72,16 @@ app.get('/api/get-drink', function (req, res) {
     res.send(drinks);
 });
 
-app.post('/api/after-drink', function (req, res) {
-    console.log("here");
-    var drink = req.body.drink;
-    var comment = req.body.comment
-    var tryAgain = req.body.tryAgain
-    console.log(tryAgain);
-    var token = req.body.token
-    console.log("GET : Request received with " + req.body);
-    console.log(req.body);
-    var user = userModel.findOne('fbToken',token);
+app.get('/api/after-drink', function (req, res) {
+    var drink = req.query.drink;
+    console.log("GET : Request received with drink : " + drink);
+    var comment = req.query.comment;
+    console.log("GET : Response sent with comment : " + comment);
+    var tryAgain = req.query.tryAgain;
+    console.log("GET : Response sent with tryAgain : " + tryAgain);
+    var token = req.query.token;
+    console.log("GET : Response sent with token : " + token);
+    var user = userModel.findOne('fbId',token);
     var user_id = user._id;
 
     var drinkAction = new drinkActionModel(
@@ -97,9 +99,9 @@ app.post('/api/after-drink', function (req, res) {
         console.log("Created drinkAction successfully");
         var bannedDrinks = user.excludedDrinks;
 
-        if (tryAgain === false) {
+        if (tryAgain === 'false') {
           console.log("here");
-          bannedDrinks.append(ObjectId(request.body.drink));
+          bannedDrinks.append(mongoose.Types.ObjectId(request.body.drink));
           user.excludedDrinks = bannedDrinks;
         }
         userModel.update(
