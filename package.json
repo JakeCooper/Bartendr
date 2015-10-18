@@ -1,0 +1,21 @@
+{
+  "name": "bartendr",
+  "version": "0.0.1",
+  "description": "API for mixed drinks",
+  "main": "backend.js",
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://www.github.com/JakeCooper/Bartendr.git"
+  },
+  "keywords": [
+    "bar"
+  ],
+  "author": "HootHacks",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.13.3"
+  }
+}
