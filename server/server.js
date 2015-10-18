@@ -9,7 +9,7 @@ server.listen(8080, function(){
     var host = server.address().address;
     var port = server.address().port;
 
-    console.log('Locale webserver launched at http://%s:%s', host, port);
+    console.log('Bartendr webserver launched at http://%s:%s', host, port);
 });
 
 app.get('/api/', function (req, res) {
