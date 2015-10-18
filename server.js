@@ -46,12 +46,25 @@ app.get('/', function(req, res) {
 
 app.get('/api/get-drink', function (req, res) {
     var ingredients = req.query.ingredients;
+
     console.log("GET : Request received with ingredients : " + ingredients);
-    var query = drinkModel.find({ingredients : {$in : ingredients}});
+    var query = drinkModel.find({ingredients : {$in : ingredients}}, function(err, data) {
+        for (var h = 0; h < data.length; h++) {
+            if(data[h]["ingredients"].length !== ingredients.length)
+                return false;
+            for(var i = drinkModel.length; i--;) {
+                if(drinkModel[i] !== ingredients[i])
+                    return false;
+            }
+            return true;
+        }
+    });
+
+    //ingredients
     query.select("name instructions ingredients");
     query.exec(function (err, drink) {
         if (drink === undefined) {
-            res.send("Sorry, you can't make anything.");
+            res.send("Sorry, no drinks found with your given ingredients.");
         } else {
             res.send(drink);
         }
@@ -94,7 +107,7 @@ app.get('/api/fb-login', function (req, res) {
     request(uri, function (error, response, body) {
         if (!error && response.statusCode == 200) {
             info = JSON.parse(response.body);
-            name = info["name"]; // Show the HTML for the Google homepage.
+            name = info["name"];
             fbId = info["id"];
             var query = userModel.find({name : name, fbId : fbId});
             query.select("name fbId");
@@ -122,7 +135,3 @@ app.get('/api/fb-login', function (req, res) {
 
 
 });
-
-function GetDrink (ingredientList) {
-    //{ingredients : {$setUnion: [ingredientList]}
-}
