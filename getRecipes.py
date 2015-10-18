@@ -22,11 +22,13 @@ def strip_tags(html):
     return s.get_data()
 
 
+ingredients = set();
 drinks = [];
-for i in range(5510,6217):
+for i in range(1,6217,2):
+    if (i%500 == 0):
+        print len(ingredients)
     drink = {}
-    if (i%100 == 0):
-        print "checking drink "+ str(i)
+    print "checking drink "+ str(i)
     url ="http://www.webtender.com/db/drink/"+str(i)
     headers = {'user-agent': 'my-app/0.0.1'}
     page = requests.get(url,headers=headers)
@@ -45,9 +47,11 @@ for i in range(5510,6217):
         for ing in ing_list:
             if (strip_tags(ing) != ""):
                 ings.append(strip_tags(ing))
+                ingredients.add(strip_tags(ing))
 
         ings.pop(0)
         drink["ingredients"] = ings
+
 
         rest_index = source.index('<div align="center"><br/><script type="text/javascript">&lt;!--');
         rest = source[ing_end+20:rest_index]
@@ -60,20 +64,73 @@ for i in range(5510,6217):
             drink["instructions"] = strip_tags(rest).strip();
 
 
-        request_url = "https://bartendr.herokuapp.com/api/add-drink?"
-        encoded_params = urllib.urlencode(drink);
-
-        request_url = request_url + encoded_params
+        # request_url = "https://bartendr.herokuapp.com/api/add-drink?"
+        # encoded_params = urllib.urlencode(drink);
+        #
+        # request_url = request_url + encoded_params
         #r=requests.get(request_url)
         #print r.status_code
         #print request_url
         drinks.append(drink)
 
+nicer_ingredients = set()
+for x in ingredients:
+    if ("oz" in x):
+        index = x.index("oz") + 3;
+        nicer_ingredients.add(x[index:])
+
+    elif ("dash" in x):
+        index = x.index("dash") + 5;
+        nicer_ingredients.add(x[index:])
+    elif ("dashes" in x):
+        index = x.index("dashes") + 7;
+        nicer_ingredients.add(x[index:])
+
+    elif ("tsp" in x):
+        index = x.index("tsp") + 4;
+        nicer_ingredients.add(x[index:])
+
+    elif ("cups" in x):
+        index = x.index("cups") + 5;
+        nicer_ingredients.add(x[index:])
+    elif ("cup" in x):
+        index = x.index("cup") + 4;
+        nicer_ingredients.add(x[index:])
+    elif ("tblsp" in x):
+        index = x.index("tblsp")+ 6;
+        nicer_ingredients.add(x[index:])
+
+    elif ("slice" in x):
+        index = x.index("slice") + 6;
+        nicer_ingredients.add(x[index:])
+    elif ("slices" in x):
+        index = x.index("slices") + 7;
+        nicer_ingredients.add(x[index:])
+    elif ("lb" in x):
+        index = x.index("lb") + 3;
+        nicer_ingredients.add(x[index:])
+    elif ("lbs" in x):
+        index = x.index("lbs") + 4;
+        nicer_ingredients.add(x[index:])
+    elif(unicode(x[0],'utf-8').isnumeric()):
+        index = 0;
+        for i,x in enumerate(x):
+            if (unicode(x).isalpha()):
+                index = i
+        nicer_ingredients.add(x[index:])
+
+    else:
+        nicer_ingredients.add(x)
+
+ingredients = list(nicer_ingredients)
+
+print nicer_ingredients
 
 with open("drinks.json", "w") as outfile:
     json.dump(drinks, outfile, indent=4)
 
-
+with open("ingredients.json","w") as outfile:
+    json.dump(ingredients,outfile, indent=4)
 
 
 # drink["ingredients"] = ings;
