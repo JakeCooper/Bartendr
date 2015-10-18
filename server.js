@@ -5,7 +5,8 @@
 var app = require('express')(),
     server = require('http').Server(app),
     MongoClient = require('mongodb').MongoClient,
-    mongoose = require('mongoose');
+    mongoose = require('mongoose'),
+    request = require('request');
 
 var uri = "mongodb://admin:admin@ds041144.mongolab.com:41144/bartendr";
 var db = mongoose.connect(uri);
@@ -23,7 +24,7 @@ var drinkModel = mongoose.model('drinks', drinkSchema);
 var userSchema = new Schema({
    name : { type: String, default: 'Joe'},
    email : { type: String, default: 'JoeSmith@Gmail.com'} ,
-   fbToken : { type : String, default: 'a;klsdfklj;klsdfjas'},
+   fbId : { type : String, default: 'a;klsdfklj;klsdfjas'},
    excludedDrinks : { type : Array, defaults: ["Smirnoff"]},
    triedDrinks :  { type : Array, defaults :  []},
    likedDrinks : { type : Array, defaults : []},
@@ -81,28 +82,46 @@ app.get('/api/add-drink', function (req, res) {
 
 app.get('/api/fb-login', function (req, res) {
     var token = req.query.token;
-    //make requests to graph API.
+    var uri = "https://graph.facebook.com/v1.0/me\?access_token\=" + token;
+    var name = null,
+        email = null,
+        fbId = null,
+        excludedDrinks = ["Smirnoff"],
+        triedDrinks = ["Smirnoff"],
+        likedDrinks = ["Smirnoff"],
+        creationDate = "05-31-1995";
+
+    // make requests to graph API.
+    request(uri, function (error, response, body) {
+        if (!error && response.statusCode == 200) {
+            info = JSON.parse(response.body);
+            name = info["name"]; // Show the HTML for the Google homepage.
+            fbId = info["id"];
+            var query = userModel.find({name : name, fbId : fbId});
+            query.select("name fbId");
+            query.exec(function (err, exists) {
+                if (exists === 0) {
+                    var user = new userModel({name : name, email : email, fbId: fbId, excludedDrinks : excludedDrinks, triedDrinks : triedDrinks, likedDrinks : likedDrinks, creationDate : creationDate});
+                    user.save(function (err) {
+                        if (err) {
+                            console.log(err);
+                            res.send(err);
+                        } else {
+                            console.log("Created user successfully");
+                            res.send("Created user successfully");
+                        }
+                    });
+                } else {
+                    res.send("User already exists");
+                }
+            });
+        }
+    });
+
     //check if the god damn user exists
 
 
-    var name = "Joe Smith",
-        email = "Joe@Smith.com",
-        fbToken = "ajlskdfja",
-        excludedDrinks = "Smirnoff",
-        triedDrinks = "Smirnoff",
-        likedDrinks = "Smirnoff",
-        creationDate = "05-31-1995";
 
-    var user = new userModel({name : name, email : email, fbToken: fbToken, excludedDrinks : excludedDrinks, triedDrinks : triedDrinks, likedDrinks : likedDrinks, creationDate : creationDate});
-    user.save(function (err) {
-        if (err) {
-            console.log(err);
-            res.send(err);
-        } else {
-            console.log("Created user successfully");
-            res.send("Created user successfully");
-        }
-    });
 });
 
 function GetDrink (ingredientList) {
