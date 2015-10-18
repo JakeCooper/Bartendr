@@ -41,14 +41,12 @@ app.get('/api/get-drink', function (req, res) {
 
 app.get('/api/add-drink', function (req, res) {
     console.log("GET : Request received to add drink with properties : " + req.query);
-    var name = req.query.name,
-        ingredients = req.query.ingredients.map(function (ingredient){
-            return ingredient.replace("%20", " ");
-        }),
-        instructions = req.query.instructions,
-        comments = req.query.comments;
+    var name = unescape(req.query.name),
+        ingredients = unescape(req.query.ingredients),
+        instructions = unescape(req.query.instructions),
+        comments = unescape(req.query.comments);
 
-    var drink = new drinkModel({name: name.replace("%20", " "), ingredients: ingredients, instructions: instructions.replace("%20", " "), comments: comments.replace("%20", " ")});
+    var drink = new drinkModel({name: name, ingredients: ingredients, instructions: instructions, comments: comments});
     console.log("drink summary: " + drink);
 
     drink.save(function (err) {
