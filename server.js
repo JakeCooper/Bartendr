@@ -75,18 +75,7 @@ app.get('/api/get-drink', function (req, res) {
           }
       }
       res.send(validDrinks);
-    });
-
-
-    //ingredients
-    //query.select("name instructions ingredients");
-    //query.exec(function (err, drink) {
-    //    if (drink === undefined) {
-    //        res.send("Sorry, no drinks found with your given ingredients.");
-    //    } else {
-    //        res.send(drink);
-    //    }
-    //});
+    })
 });
 
 app.get('/api/add-drink', function (req, res) {
