@@ -47,9 +47,9 @@ function superbag(sup, sub) {
     sub.sort();
     var i, j;
     for (i=0,j=0; i<sup.length && j<sub.length;) {
-        if (sup[i] < sub[j]) {
+        if (sup[i].toLowerCase() < sub[j].toLowerCase()) {
             ++i;
-        } else if (sup[i] == sub[j]) {
+        } else if (sup[i].toLowerCase() == sub[j].toLowerCase()) {
             ++i; ++j;
         } else {
             // sub[j] not in sup, so sub not subbag
