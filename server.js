@@ -12,6 +12,10 @@ server.listen(8080, function(){
     console.log('Bartendr webserver launched at http://%s:%s', host, port);
 });
 
+app.get('/', function(req, res) {
+   res.send("Welcome to Bartendr");
+});
+
 app.get('/api/', function (req, res) {
     var ingredients = req.query.ingredient;
     console.log("GET : Request received with ingredients : " + ingredients);
