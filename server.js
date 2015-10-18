@@ -74,16 +74,23 @@ app.get('/', function(req, res) {
 app.get('/api/get-drink', function (req, res) {
     var ingredients = req.query.ingredients;
     var validDrinks = [];
+    if (!ingredients) {
+        res.send("Sorry, invalid ingredients provided.");
+        return;
+    }
+
+    if (typeof ingredients === "string") {
+        ingredients = [ingredients];
+    }
 
     console.log("GET : Request received with ingredients : " + ingredients);
-
     drinkModel.find({}, function(err, data) {
-      for (var i=0; i < data.length; i++) {
-          if (superbag(ingredients, data[i]["ingredients"])) {
-            validDrinks.push(data[i]);
-          }
-      }
-      res.send(validDrinks);
+        for (var i=0; i < data.length; i++) {
+            if (superbag(ingredients, data[i]["ingredients"])) {
+                validDrinks.push(data[i]);
+            }
+        }
+        res.send(validDrinks);
     })
 });
 
