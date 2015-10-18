@@ -31,6 +31,15 @@ var userSchema = new Schema({
    creationDate : { type : Array, default :  []}
 });
 
+var drinkActionSchema = new Schema({
+    user : {  type : Schema.ObjectId },
+    comment : {type : String, default: ""},
+    drink : {type : Schema.ObjectId},
+    date : {type : Date, default: Date.now}
+});
+
+var drinkActionModel = mongoose.model('drinkactions', drinkActionSchema);
+
 var userModel = mongoose.model('users', userSchema);
 
 function superbag(sup, sub) {
@@ -76,6 +85,53 @@ app.get('/api/get-drink', function (req, res) {
       }
       res.send(validDrinks);
     })
+});
+
+app.get('/api/after-drink', function (req, res) {
+    var drink = req.query.drink;
+    console.log("GET : Request received with drink : " + drink);
+    var comment = req.query.comment;
+    console.log("GET : Response sent with comment : " + comment);
+    var tryAgain = req.query.tryAgain;
+    console.log("GET : Response sent with tryAgain : " + tryAgain);
+    var token = req.query.token;
+    console.log("GET : Response sent with token : " + token);
+    var user = userModel.findOne('fbId',token);
+    var user_id = user._id;
+
+    var drinkAction = new drinkActionModel(
+        {
+            user: mongoose.Types.ObjectId(user_id),
+            comment: comment,
+            drink: mongoose.Types.ObjectId(drink)
+        }
+    );
+    drinkAction.save(function(err) {
+        if (err) {
+            console.log(err);
+            res.send(err);
+        } else {
+            console.log("Created drinkAction successfully");
+            var bannedDrinks = user.excludedDrinks;
+
+            if (tryAgain === 'false') {
+                console.log("here");
+                bannedDrinks.append(mongoose.Types.ObjectId(request.body.drink));
+                user.excludedDrinks = bannedDrinks;
+            }
+            userModel.update(
+                {
+                    _id: user_id,
+                }, user, function (err, result) {
+                    if (err) {
+                        res.send("You fucked up");
+                        res.send(err);
+                    } else {
+                        res.send("OK");
+                    }
+                });
+        }
+    });
 });
 
 app.get('/api/add-drink', function (req, res) {
