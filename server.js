@@ -20,6 +20,18 @@ var drinkSchema = new Schema({
 
 var drinkModel = mongoose.model('drinks', drinkSchema);
 
+var userSchema = new Schema({
+   name : { type: String, default: 'Joe'},
+   email : { type: String, default: 'JoeSmith@Gmail.com'} ,
+   fbToken : { type : String, default: 'a;klsdfklj;klsdfjas'},
+   excludedDrinks : { type : Array, defaults: ["Smirnoff"]},
+   triedDrinks :  { type : Array, defaults :  []},
+   likedDrinks : { type : Array, defaults : []},
+   creationDate : { type : Array, default :  []}
+});
+
+var userModel = mongoose.model('users', userSchema);
+
 server.listen(process.env.PORT, function(){
     var host = server.address().address;
     var port = server.address().port;
@@ -54,15 +66,34 @@ app.get('/api/add-drink', function (req, res) {
             console.log(err);
             res.send(err);
         } else {
-            console.log("Sucess");
-            res.send("Success");
+            console.log("Created drink successfully");
+            res.send("Created drink successfully");
         }
     });
 });
 
 app.get('/api/fb-login', function (req, res) {
     var token = req.query.token;
-    res.send();
+    //make requests to graph API.
+    //check if the god damn use exists
+    var name = "Joe Smith",
+        email = "Joe@Smith.com",
+        fbToken = "ajlskdfja",
+        excludedDrinks = "Smirnoff",
+        triedDrinks = "Smirnoff",
+        likedDrinks = "Smirnoff",
+        creationDate = "05-31-1995";
+
+    var user = new userModel({name : name, email : email, fbToken: fbToken, excludedDrinks : excludedDrinks, triedDrinks : triedDrinks, likedDrinks : likedDrinks, creationDate : creationDate});
+    user.save(function (err) {
+        if (err) {
+            console.log(err);
+            res.send(err);
+        } else {
+            console.log("Created user successfully");
+            res.send("Created user successfully");
+        }
+    });
 });
 
 function GetDrink (ingredientList) {
