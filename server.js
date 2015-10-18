@@ -7,6 +7,7 @@ var app = require('express')(),
     MongoClient = require('mongodb').MongoClient,
     mongoose = require('mongoose'),
     request = require('request');
+    Clarifai = require('./clarifai_node.js');
 
 
 var ODclientID = "0000000040170505";
@@ -16,6 +17,7 @@ var redirectLink = "https://bartendr.herokuapp.com/api/onedrive-auth-cont";
 var uri = "mongodb://admin:admin@ds041144.mongolab.com:41144/bartendr";
 var db = mongoose.connect(uri);
 var Schema = mongoose.Schema;
+Clarifai.initAPI("_95O_mfpTpzCT4evHOuBNhDJ9kia-WPkrwiZcgwq", "qpBorF60XxbTklsK9j4MaDiXYzkJXBap6LoRvttX");
 
 var drinkSchema = new Schema({
     name  :  { type: String, default: '' },
@@ -36,6 +38,15 @@ var userSchema = new Schema({
    creationDate : { type : Array, default :  []}
 });
 
+var drinkActionSchema = new Schema({
+    user : {  type : Schema.ObjectId },
+    comment : {type : String, default: ""},
+    drink : {type : Schema.ObjectId},
+    date : {type : Date, default: Date.now}
+});
+
+var drinkActionModel = mongoose.model('drinkactions', drinkActionSchema);
+
 var userModel = mongoose.model('users', userSchema);
 
 function superbag(sup, sub) {
@@ -43,9 +54,9 @@ function superbag(sup, sub) {
     sub.sort();
     var i, j;
     for (i=0,j=0; i<sup.length && j<sub.length;) {
-        if (sup[i] < sub[j]) {
+        if (sup[i].toLowerCase() < sub[j].toLowerCase()) {
             ++i;
-        } else if (sup[i] == sub[j]) {
+        } else if (sup[i].toLowerCase() == sub[j].toLowerCase()) {
             ++i; ++j;
         } else {
             // sub[j] not in sup, so sub not subbag
@@ -70,28 +81,71 @@ app.get('/', function(req, res) {
 app.get('/api/get-drink', function (req, res) {
     var ingredients = req.query.ingredients;
     var validDrinks = [];
+    if (!ingredients) {
+        res.send("Sorry, invalid ingredients provided.");
+        return;
+    }
+
+    if (typeof ingredients === "string") {
+        ingredients = [ingredients];
+    }
 
     console.log("GET : Request received with ingredients : " + ingredients);
-
     drinkModel.find({}, function(err, data) {
-      for (var i=0; i < data.length; i++) {
-          if (superbag(ingredients, data[i]["ingredients"])) {
-            validDrinks.push(data[i]);
-          }
-      }
-      res.send(validDrinks);
+        for (var i=0; i < data.length; i++) {
+            if (superbag(ingredients, data[i]["ingredients"])) {
+                validDrinks.push(data[i]);
+            }
+        }
+        res.send(validDrinks);
+    })
+});
+
+app.get('/api/after-drink', function (req, res) {
+    var drink = req.query.drink;
+    console.log("GET : Request received with drink : " + drink);
+    var comment = req.query.comment;
+    console.log("GET : Response sent with comment : " + comment);
+    var tryAgain = req.query.tryAgain;
+    console.log("GET : Response sent with tryAgain : " + tryAgain);
+    var token = req.query.token;
+    console.log("GET : Response sent with token : " + token);
+    var user = userModel.findOne('fbId',token);
+    var user_id = user._id;
+
+    var drinkAction = new drinkActionModel(
+        {
+            user: mongoose.Types.ObjectId(user_id),
+            comment: comment,
+            drink: mongoose.Types.ObjectId(drink)
+        }
+    );
+    drinkAction.save(function(err) {
+        if (err) {
+            console.log(err);
+            res.send(err);
+        } else {
+            console.log("Created drinkAction successfully");
+            var bannedDrinks = user.excludedDrinks;
+
+            if (tryAgain === 'false') {
+                console.log("here");
+                bannedDrinks.append(mongoose.Types.ObjectId(request.body.drink));
+                user.excludedDrinks = bannedDrinks;
+            }
+            userModel.update(
+                {
+                    _id: user_id,
+                }, user, function (err, result) {
+                    if (err) {
+                        res.send("You fucked up");
+                        res.send(err);
+                    } else {
+                        res.send("OK");
+                    }
+                });
+        }
     });
-
-
-    //ingredients
-    //query.select("name instructions ingredients");
-    //query.exec(function (err, drink) {
-    //    if (drink === undefined) {
-    //        res.send("Sorry, no drinks found with your given ingredients.");
-    //    } else {
-    //        res.send(drink);
-    //    }
-    //});
 });
 
 app.get('/api/add-drink', function (req, res) {
@@ -167,8 +221,10 @@ app.get('/api/fb-login', function (req, res) {
         }
     });
 
-    //check if the god damn user exists
-
-
-
+    app.post('/api/getTags', function (req, res) {
+      var testImageURL = req.body.url;
+      var ourId = req.body.id;
+        
+      Clarifai.tagURL( testImageURL , ourId, commonResultHandler );
+    });
 });
