@@ -20,8 +20,8 @@ var Schema = mongoose.Schema;
 Clarifai.initAPI("_95O_mfpTpzCT4evHOuBNhDJ9kia-WPkrwiZcgwq", "qpBorF60XxbTklsK9j4MaDiXYzkJXBap6LoRvttX");
 
 var drinkSchema = new Schema({
-    name  :  { type: String, default: '' },
-    ingredients   :  { type: Array, default: [] },
+    name :  { type: String, default: '' },
+    ingredients :  { type: Array, default: [] },
     instructions : {type: String, default: ""},
     comments : {type: String, default: ''}
 });
@@ -46,6 +46,12 @@ var drinkActionSchema = new Schema({
 });
 
 var drinkActionModel = mongoose.model('drinkactions', drinkActionSchema);
+
+var ingredientSchema = new Schema({
+    ingredients : { type : Array, default : []}
+});
+
+var ingredientModel = mongoose.model('ingredients', ingredientSchema);
 
 var userModel = mongoose.model('users', userSchema);
 
@@ -186,7 +192,7 @@ app.get('/api/onedrive-auth-cont', function(req,res) {
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded'
       }
-    }
+    };
     request(options, function(error, response, body) {
       console.log(response);
     });
@@ -236,5 +242,12 @@ app.get('/api/fb-login', function (req, res) {
       var ourId = req.body.id;
         
       Clarifai.tagURL( testImageURL , ourId, commonResultHandler );
+    });
+});
+
+app.get('/api/get-ingredients', function (req, res) {
+    ingredientModel.find({}, function (err, data) {
+        console.log("Sending ingredients");
+        res.send(data[0]["ingredients"]);
     });
 });
