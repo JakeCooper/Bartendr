@@ -5,7 +5,7 @@
 var app = require('express')(),
     server = require('http').Server(app);
 
-server.listen(8080, function(){
+server.listen(80, function(){
     var host = server.address().address;
     var port = server.address().port;
 
@@ -19,7 +19,7 @@ app.get('/', function(req, res) {
 app.get('/api/', function (req, res) {
     var ingredients = req.query.ingredient;
     console.log("GET : Request received with ingredients : " + ingredients);
-    var drinks = DoSearch();
+    var drinks = DoSearch(ingredients);
     console.log("POST : Response sent with drinks : " + drinks);
     res.send(drinks);
 });
