@@ -62,6 +62,11 @@ app.get('/api/add-drink', function (req, res) {
     });
 });
 
+app.get('/api/fb-login', function (req, res) {
+    var token = req.query.token;
+    res.send();
+});
+
 function GetDrink (ingredientList) {
     return ["Jagerbombs"];
 }
