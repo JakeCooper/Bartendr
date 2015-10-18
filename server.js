@@ -33,6 +33,24 @@ var userSchema = new Schema({
 
 var userModel = mongoose.model('users', userSchema);
 
+function superbag(sup, sub) {
+    sup.sort();
+    sub.sort();
+    var i, j;
+    for (i=0,j=0; i<sup.length && j<sub.length;) {
+        if (sup[i] < sub[j]) {
+            ++i;
+        } else if (sup[i] == sub[j]) {
+            ++i; ++j;
+        } else {
+            // sub[j] not in sup, so sub not subbag
+            return false;
+        }
+    }
+    // make sure there are no elements left in sub
+    return j == sub.length;
+}
+
 server.listen(process.env.PORT, function(){
     var host = server.address().address;
     var port = server.address().port;
@@ -46,29 +64,29 @@ app.get('/', function(req, res) {
 
 app.get('/api/get-drink', function (req, res) {
     var ingredients = req.query.ingredients;
+    var validDrinks = [];
 
     console.log("GET : Request received with ingredients : " + ingredients);
-    var query = drinkModel.find({ingredients : {$in : ingredients}}, function(err, data) {
-        for (var h = 0; h < data.length; h++) {
-            if(data[h]["ingredients"].length !== ingredients.length)
-                return false;
-            for(var i = drinkModel.length; i--;) {
-                if(drinkModel[i] !== ingredients[i])
-                    return false;
-            }
-            return true;
-        }
+
+    drinkModel.find({}, function(err, data) {
+      for (var i=0; i < data.length; i++) {
+          if (superbag(ingredients, data[i]["ingredients"])) {
+            validDrinks.push(data[i]);
+          }
+      }
+      res.send(validDrinks);
     });
 
+
     //ingredients
-    query.select("name instructions ingredients");
-    query.exec(function (err, drink) {
-        if (drink === undefined) {
-            res.send("Sorry, no drinks found with your given ingredients.");
-        } else {
-            res.send(drink);
-        }
-    });
+    //query.select("name instructions ingredients");
+    //query.exec(function (err, drink) {
+    //    if (drink === undefined) {
+    //        res.send("Sorry, no drinks found with your given ingredients.");
+    //    } else {
+    //        res.send(drink);
+    //    }
+    //});
 });
 
 app.get('/api/add-drink', function (req, res) {
