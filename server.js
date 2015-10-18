@@ -46,9 +46,16 @@ app.get('/', function(req, res) {
 app.get('/api/get-drink', function (req, res) {
     var ingredients = req.query.ingredients;
     console.log("GET : Request received with ingredients : " + ingredients);
-    var drinks = GetDrink(ingredients);
-    console.log("GET : Response sent with drinks : " + drinks);
-    res.send(drinks);
+    var query = drinkModel.find({ingredients : {$in : ingredients}});
+    query.select("name");
+    query.exec(function (err, drink) {
+        console.log("Possible drinks are : " + drink);
+        if (drink === undefined) {
+            res.send("Sorry, you can't make anything.");
+        } else {
+            res.send(drink);
+        }
+    });
 });
 
 app.get('/api/add-drink', function (req, res) {
@@ -99,7 +106,5 @@ app.get('/api/fb-login', function (req, res) {
 });
 
 function GetDrink (ingredientList) {
-    //drink - inventory = empty set.
-    var drink = new drinkModel({});
-    return ["Jagerbombs"];
+    //{ingredients : {$setUnion: [ingredientList]}
 }
