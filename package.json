@@ -19,6 +19,8 @@
   "author": "HootHacks",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.13.3"
+    "express": "^4.13.3",
+    "mongodb": "^2.0.46",
+    "mongoose": "^4.1.11"
   }
 }
