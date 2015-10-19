@@ -236,13 +236,13 @@ app.get('/api/fb-login', function (req, res) {
             });
         }
     });
+});
 
-    app.post('/api/getTags', function (req, res) {
-      var testImageURL = req.body.url;
-      var ourId = req.body.id;
-        
-      Clarifai.tagURL( testImageURL , ourId, commonResultHandler );
-    });
+app.post('/api/getTags', function (req, res) {
+    var testImageURL = req.body.url;
+    var ourId = req.body.id;
+
+    Clarifai.tagURL( testImageURL , ourId, commonResultHandler );
 });
 
 app.get('/api/get-ingredients', function (req, res) {
